@@ -62,11 +62,11 @@ const sidebarItems = [
     href: "/dashboard/sales",
     icon: BarChart2,
   },
-  {
-    title: "Reviews & Ratings",
-    href: "/dashboard/reviews",
-    icon: Star,
-  },
+  // {
+  //   title: "Reviews & Ratings",
+  //   href: "/dashboard/reviews",
+  //   icon: Star,
+  // },
   {
     title: "Payment",
     href: "/dashboard/payment",

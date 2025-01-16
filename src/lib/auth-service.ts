@@ -11,7 +11,8 @@ export async function register(data: {
   name: string
   email: string
   password: string
-  role: 'admin' | 'vendor'
+  role: 'Admin' | 'Vendor'
+  loginProvider: 'Local'
 }) {
   // Simulating API call
   await new Promise(resolve => setTimeout(resolve, 1000))
