@@ -28,11 +28,11 @@ const sidebarItems = [
     href: "/dashboard/products",
     icon: Package,
     children: [
-      {
-        title: "Add New Product",
-        href: "/dashboard/products/new",
-        icon: Plus,
-      },
+      // {
+      //   title: "Add New Product",
+      //   href: "/dashboard/products/new",
+      //   icon: Plus,
+      // },
       {
         title: "View All Products",
         href: "/dashboard/products",

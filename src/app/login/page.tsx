@@ -6,20 +6,39 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import axios from "axios";
+import { Loader2 } from "lucide-react";
+import { login } from "@/lib/auth-service";
+import { useToast } from "@/hooks/use-toast";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
-      const response = await axios.post("/api/login", { email, password });
-      localStorage.setItem("token", response.data.token);
-      router.push("/dashboard");
+      await login({ email, password }).then((response) => {
+        localStorage.setItem("auth_token", response.token);
+        localStorage.setItem("user", JSON.stringify(response));
+        toast({
+          title: "Login successful",
+          description: "Welcome back!",
+        });
+        router.push("/dashboard");
+      });
     } catch (error) {
-      console.error("Login failed", error);
+      toast({
+        variant: "destructive",
+        title: "Login failed",
+        description:
+          error instanceof Error ? error.message : "Something went wrong",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -49,8 +68,19 @@ export default function LoginPage() {
             required
           />
         </div>
-        <Button type="submit" className="w-full">
-          Login
+        <Button
+          type="submit"
+          className="w-full bg-[#00BFA6] hover:bg-[#00BFA6]/90"
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Signing in...
+            </>
+          ) : (
+            "Sign in"
+          )}
         </Button>
       </form>
     </div>

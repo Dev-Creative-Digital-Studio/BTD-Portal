@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -13,28 +14,82 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Product } from "@/app/types";
-
+import { Block } from "@uiw/react-color";
+import { ScrollArea } from "@radix-ui/react-scroll-area";
 interface ProductFormProps {
   product?: Product;
   onSubmit: (product: Product) => void;
 }
 
 export function ProductForm({ product, onSubmit }: ProductFormProps) {
-  const [name, setName] = useState(product?.name || "");
+  const [name, setName] = useState(product?.title || "");
   const [description, setDescription] = useState(product?.description || "");
   const [price, setPrice] = useState(product?.price?.toString() || "");
+  const [discountedPrice, setDiscountedPrice] = useState(
+    product?.discountedPrice?.toString() || ""
+  );
   const [category, setCategory] = useState(product?.category || "");
-  const [stock, setStock] = useState(product?.stock?.toString() || "");
+  const [orderMaxDays, setOrderMaxDays] = useState(
+    product?.orderMaxDays.toString() || ""
+  );
+  const [orderMinDays, setOrderMinDays] = useState(
+    product?.orderMinDays.toString() || ""
+  );
+
+  const [colors, setColors] = useState<{ hex: string; isOpen: boolean }[]>(
+    product?.colorVariations
+      ? product?.colorVariations?.map((color) => ({
+          hex: color,
+          isOpen: false,
+        }))
+      : []
+  );
+  const [selectedSizes, setSelectedSizes] = useState<string[]>(
+    product?.sizeVariations || []
+  );
+  const sizeOptions = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
+  const [files, setFiles] = useState<FileList | null>();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit({
-      id: product?.id ? product.id : undefined,
-      name,
+      _id: product?._id ? product._id : undefined,
+      title: name,
       description,
       price: parseFloat(price),
+      discountedPrice: discountedPrice
+        ? parseFloat(discountedPrice)
+        : undefined,
       category,
-      stock: parseInt(stock, 10),
+      orderMinDays: parseInt(orderMinDays, 10),
+      orderMaxDays: parseInt(orderMaxDays, 10),
+      colorVariations: colors.map((color) => color.hex),
+      sizeVariations: selectedSizes,
+      files: files ? Array.from(files) : undefined,
+    });
+  };
+
+  const handleCheckboxChange = (size: string) => {
+    setSelectedSizes((prevSizes) => {
+      if (prevSizes.includes(size)) {
+        // If size is already selected, remove it
+        return prevSizes.filter((s) => s !== size);
+      } else {
+        // If size is not selected, add it
+        return [...prevSizes, size];
+      }
+    });
+  };
+
+  const handleCloseAllColors = async () => {
+    new Promise((resolve) => {
+      setColors(
+        colors.map((color) => ({
+          ...color,
+          isOpen: false,
+        }))
+      );
+      resolve(true);
     });
   };
 
@@ -62,18 +117,63 @@ export function ProductForm({ product, onSubmit }: ProductFormProps) {
       </div>
       <div className="space-y-2">
         <Label htmlFor="price">Price</Label>
-        <Input
-          id="price"
-          type="number"
-          placeholder="Enter price"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-          required
-        />
+        <div className="input-icon">
+          <Input
+            id="price"
+            type="number"
+            placeholder="Enter price"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            required
+          />
+          <i>$</i>
+        </div>
       </div>
       <div className="space-y-2">
+        <Label htmlFor="discounted-price">Discounted Price (optional)</Label>
+
+        <div className="input-icon">
+          <Input
+            id="discounted-price"
+            type="number"
+            placeholder="Enter Discounted price"
+            value={discountedPrice}
+            onChange={(e) => setDiscountedPrice(e.target.value)}
+            required={false}
+          />
+          <i>$</i>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <div className="grid w-full max-w-sm items-center gap-1.5">
+          <Label htmlFor="picture">Picture</Label>
+
+          <Input
+            id="picture"
+            type="file"
+            multiple
+            required
+            onChange={(e) => {
+              setFiles(e.target.files);
+            }}
+          />
+        </div>
+
+        {product?.images && !files && (
+          <div className="flex flex-row space-x-4">
+            {product.images.map((image, index) => (
+              <div key={index}>
+                <img src={image} alt={`Product ${index}`} />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-2">
         <Label htmlFor="category">Category</Label>
-        <Select value={category} onValueChange={setCategory}>
+        <Select value={category} onValueChange={setCategory} required>
           <SelectTrigger>
             <SelectValue placeholder="Select a category" />
           </SelectTrigger>
@@ -82,19 +182,109 @@ export function ProductForm({ product, onSubmit }: ProductFormProps) {
             <SelectItem value="clothing">Clothing</SelectItem>
             <SelectItem value="home">Home & Garden</SelectItem>
             <SelectItem value="books">Books</SelectItem>
+            <SelectItem value="other">Other</SelectItem>
           </SelectContent>
         </Select>
       </div>
+      <div className=" flex flex-row space-x-4">
+        <div className="space-y-2">
+          <Label htmlFor="orderMinDays">Min days to order</Label>
+          <Input
+            id="orderMinDays"
+            type="number"
+            placeholder="Enter Min days to order"
+            value={orderMinDays}
+            onChange={(e) => setOrderMinDays(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="orderMaxDays">Max days to order</Label>
+          <Input
+            id="orderMaxDays"
+            type="number"
+            placeholder="Enter Max days to order"
+            value={orderMaxDays}
+            onChange={(e) => setOrderMaxDays(e.target.value)}
+            required
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2 ">
+        <Label htmlFor="color">Color</Label>
+
+        <div className="flex flex-row space-x-4">
+          {colors.map((color, index) => (
+            <div key={index} className="flex items-center  flex-col relative">
+              <div
+                className="absolute top-[-15px] right-0 cursor-pointer z-10 text-gray-400"
+                style={{ right: color.isOpen ? "50px" : "0" }}
+                onClick={() => {
+                  const updatedColors = [...colors];
+                  updatedColors.splice(index, 1);
+                  setColors(updatedColors);
+                }}
+              >
+                x
+              </div>
+              <div
+                className="w-[50px] h-[50px]  rounded-[50%] cursor-pointer "
+                style={{ backgroundColor: color.hex }}
+                onClick={async () => {
+                  await handleCloseAllColors().then(() => {
+                    const updatedColors = [...colors];
+                    updatedColors[index].isOpen = !updatedColors[index].isOpen;
+                    setColors(updatedColors);
+                  });
+                }}
+              ></div>
+              <Block
+                color={color.hex}
+                onChange={(e) => {
+                  const updatedColors = [...colors];
+                  updatedColors[index].hex = e.hex;
+                  updatedColors[index].isOpen = false;
+                  setColors(updatedColors);
+                }}
+                className={`${color.isOpen ? "" : "hidden"} mt-3`}
+              />
+            </div>
+          ))}
+          <div
+            className="w-[50px] h-[50px] border border-black bg-gray-100 rounded-[50%] flex items-center justify-center cursor-pointer font-bold"
+            onClick={() => {
+              const updatedColors = [...colors];
+              updatedColors.push({ hex: "#000000", isOpen: true });
+              setColors(updatedColors);
+            }}
+          >
+            +
+          </div>
+        </div>
+      </div>
+
       <div className="space-y-2">
-        <Label htmlFor="stock">Stock</Label>
-        <Input
-          id="stock"
-          type="number"
-          placeholder="Enter stock quantity"
-          value={stock}
-          onChange={(e) => setStock(e.target.value)}
-          required
-        />
+        {JSON.stringify(selectedSizes)}
+        <Label htmlFor="size">Size Options</Label>
+        <div className="flex flex-wrap gap-2">
+          {sizeOptions.map((size, index) => (
+            <div className="flex items-center space-x-2" key={index}>
+              <Checkbox
+                id={size}
+                onCheckedChange={() => handleCheckboxChange(size)}
+                checked={selectedSizes.includes(size)}
+              />
+              <label
+                htmlFor={size}
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                {size}
+              </label>
+            </div>
+          ))}
+        </div>
       </div>
       <Button type="submit">
         {product ? "Update Product" : "Add Product"}

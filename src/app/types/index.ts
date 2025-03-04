@@ -1,8 +1,14 @@
 export interface Product {
-    id: number | undefined;
-    name: string;
-    description: string;
-    price: number;
-    category: string;
-    stock: number;
-  }
+  _id: number | undefined;
+  title: string;
+  description: string;
+  price: number;
+  discountedPrice?: number;
+  category: string;
+  orderMinDays: number;
+  orderMaxDays: number;
+  colorVariations?: string[];
+  sizeVariations?: string[];
+  images?: string[];
+  files?: File[];
+}

@@ -30,14 +30,15 @@ export default function SignInPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await login(formData);
-      localStorage.setItem("auth_token", response.token);
-      localStorage.setItem("user", JSON.stringify(response.user));
-      toast({
-        title: "Login successful",
-        description: "Welcome back!",
+      await login(formData).then((response) => {
+        localStorage.setItem("auth_token", response.token);
+        localStorage.setItem("user", JSON.stringify(response));
+        toast({
+          title: "Login successful",
+          description: "Welcome back!",
+        });
+        router.push("/dashboard");
       });
-      router.push("/dashboard");
     } catch (error) {
       toast({
         variant: "destructive",
