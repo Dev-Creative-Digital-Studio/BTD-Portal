@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -13,76 +13,92 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Package2, Search } from "lucide-react";
+import axios from "axios";
+import { User } from "@/lib/auth-types";
+import { Order } from "@/app/types";
+import { formatDate } from "@/app/common";
 
-// Simulated order data
-const orders = [
-  {
-    id: "ORD-2023-001",
-    customer: "John Smith",
-    date: "2023-12-26",
-    amount: 234.5,
-    status: "Completed",
-    items: 3,
-  },
-  {
-    id: "ORD-2023-002",
-    customer: "Sarah Johnson",
-    date: "2023-12-26",
-    amount: 129.99,
-    status: "Pending",
-    items: 2,
-  },
-  {
-    id: "ORD-2023-003",
-    customer: "Michael Brown",
-    date: "2023-12-25",
-    amount: 549.99,
-    status: "Processing",
-    items: 4,
-  },
-  {
-    id: "ORD-2023-004",
-    customer: "Emma Wilson",
-    date: "2023-12-25",
-    amount: 89.99,
-    status: "Completed",
-    items: 1,
-  },
-  {
-    id: "ORD-2023-005",
-    customer: "James Davis",
-    date: "2023-12-24",
-    amount: 299.99,
-    status: "Cancelled",
-    items: 2,
-  },
-];
-
-const stats = [
-  {
-    title: "Total Orders",
-    value: "2345",
-    icon: Package2,
-  },
-  {
-    title: "Processing",
-    value: "323",
-    icon: Package2,
-  },
-  {
-    title: "Cancelled",
-    value: "17",
-    icon: Package2,
-  },
-];
+type StatsCardProps = {
+  title: string;
+  value: string;
+  icon: any;
+};
 
 export default function OrdersPage() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [stats, setStats] = useState<StatsCardProps[]>([]);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        var user = localStorage.getItem("user") as string | null;
+        var userObj = null;
+        if (user) {
+          userObj = JSON.parse(user) as User;
+        }
+
+        axios
+          .get(
+            `${process.env.NEXT_PUBLIC_API_URL}/orders-stats/vendor/${userObj?._id}`
+          )
+          .then((response) => {
+            setStats([
+              {
+                title: "Total Orders",
+                value: response.data.totalOrders,
+                icon: Package2,
+              },
+              {
+                title: "Processing",
+                value: response.data.processingOrders,
+                icon: Package2,
+              },
+              {
+                title: "Cancelled",
+                value: response.data.cancelledOrders,
+                icon: Package2,
+              },
+            ]);
+          });
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        var user = localStorage.getItem("user") as string | null;
+        var userObj = null;
+        if (user) {
+          userObj = JSON.parse(user) as User;
+        }
+
+        axios
+          .get(
+            `${process.env.NEXT_PUBLIC_API_URL}/orders/vendor/${userObj?._id}?page=1&perPage=10`
+          )
+          .then((response) => {
+            setOrders(response.data);
+          });
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      }
+    };
+
+    fetchOrders();
+  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "completed":
         return "bg-[#00BFA6] text-white";
+      case "paid":
+        return "bg-green-500 text-white";
       case "processing":
         return "bg-blue-500 text-white";
       case "pending":
@@ -146,11 +162,13 @@ export default function OrdersPage() {
           </TableHeader>
           <TableBody>
             {orders.map((order) => (
-              <TableRow key={order.id}>
-                <TableCell className="font-medium">{order.id}</TableCell>
-                <TableCell>{order.customer}</TableCell>
-                <TableCell>{order.date}</TableCell>
-                <TableCell>{order.items}</TableCell>
+              <TableRow key={order._id}>
+                <TableCell className="font-medium">{order._id}</TableCell>
+                <TableCell>{order.user.name}</TableCell>
+                <TableCell>{formatDate(order.createdAt)}</TableCell>
+                <TableCell>
+                  {order.gifts.map((gift) => gift.product.title).join(", ")}
+                </TableCell>
                 <TableCell>${order.amount.toFixed(2)}</TableCell>
                 <TableCell>
                   <span

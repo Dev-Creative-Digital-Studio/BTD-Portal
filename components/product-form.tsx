@@ -266,7 +266,6 @@ export function ProductForm({ product, onSubmit }: ProductFormProps) {
       </div>
 
       <div className="space-y-2">
-        {JSON.stringify(selectedSizes)}
         <Label htmlFor="size">Size Options</Label>
         <div className="flex flex-wrap gap-2">
           {sizeOptions.map((size, index) => (
