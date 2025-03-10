@@ -13,18 +13,6 @@ export default function HomePage() {
             className="text-sm font-medium hover:underline underline-offset-4"
             href="#"
           >
-            Features
-          </Link>
-          <Link
-            className="text-sm font-medium hover:underline underline-offset-4"
-            href="#"
-          >
-            Pricing
-          </Link>
-          <Link
-            className="text-sm font-medium hover:underline underline-offset-4"
-            href="#"
-          >
             About
           </Link>
           <Link
@@ -44,16 +32,15 @@ export default function HomePage() {
                   Welcome to Before the Dates
                 </h1>
                 <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400">
-                  Manage your events, reserve gifts, and track deliveries all in
-                  one place.
+                  Manage your inventory, payments, and orders all in one place.
                 </p>
               </div>
               <div className="space-x-4">
-                <Link href="/signup">
+                {/* <Link href="/signup">
                   <Button>Get Started</Button>
-                </Link>
-                <Link href="/login">
-                  <Button variant="outline">Log In</Button>
+                </Link> */}
+                <Link href="/auth/signin">
+                  <Button>Log In</Button>
                 </Link>
               </div>
             </div>
