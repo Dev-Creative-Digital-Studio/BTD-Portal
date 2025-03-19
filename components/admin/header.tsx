@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import Link from "next/link";
 
 export function AdminHeader() {
   return (
@@ -28,12 +29,15 @@ export function AdminHeader() {
         <Button variant="outline" size="icon" className="relative">
           <Globe className="h-4 w-4" />
           <span className="sr-only">Toggle language</span>
-        </Button>
-        <Button variant="outline" size="icon" className="relative">
-          <Bell className="h-4 w-4" />
-          <span className="absolute top-1 right-1 h-2 w-2 bg-red-600 rounded-full" />
-          <span className="sr-only">Toggle notifications</span>
-        </Button>
+        </Button>{" "}
+        <Link href="/dashboard/notifications">
+          <Button variant="outline" size="icon" className="relative">
+            {" "}
+            <Bell className="h-4 w-4" />
+            {/* <span className="absolute top-1 right-1 h-2 w-2 bg-red-600 rounded-full" /> */}
+            <span className="sr-only">Toggle notifications</span>{" "}
+          </Button>{" "}
+        </Link>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
