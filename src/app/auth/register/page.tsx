@@ -62,8 +62,8 @@ export default function RegisterPage() {
           <Image
             src="/logo.png"
             alt="Logo"
-            width={84}
-            height={84}
+            width={110}
+            height={110}
             className="mx-auto"
           />
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
